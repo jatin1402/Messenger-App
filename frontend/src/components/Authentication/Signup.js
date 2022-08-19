@@ -60,6 +60,7 @@ export default function Signup() {
           'Content-type': 'application/json',
         },
       };
+      console.log('pic------>', pic);
 
       const { data } = await axios.post(
         '/api/user',
@@ -76,12 +77,12 @@ export default function Signup() {
         position: 'bottom',
       });
       setLoading(false);
-      history.push('/chats');
+      history('/chats');
       localStorage.setItem('userInfo', JSON.stringify(data));
     } catch (err) {
       toast({
         title: 'Error occured',
-        description: err.response.data.message,
+        description: err.response,
         status: 'warning',
         duration: 5000,
         isClosable: true,
@@ -91,9 +92,9 @@ export default function Signup() {
     }
   };
 
-  const postDetails = (pic) => {
+  const postDetails = (picture) => {
     setLoading(true);
-    if (pic === undefined) {
+    if (picture === undefined) {
       //display up an error using toast
       toast({
         title: 'Picture is mandatory',
@@ -105,9 +106,9 @@ export default function Signup() {
       });
       return;
     }
-    if (pic.type === 'image/jpeg' || pic.type === 'image/png') {
+    if (picture.type === 'image/jpeg' || picture.type === 'image/png') {
       const data = new FormData();
-      data.append('file', pic);
+      data.append('file', picture);
       data.append('upload_preset', 'chat-app');
       data.append('cloud_name', 'jatinimageserver');
       fetch('https://api.cloudinary.com/v1_1/jatinimageserver/image/upload', {
@@ -118,6 +119,7 @@ export default function Signup() {
         .then((data) => {
           console.log(data);
           setPic(data.url.toString());
+          console.log(picture, '-------->', pic);
           setLoading(false);
         })
         .catch((err) => {

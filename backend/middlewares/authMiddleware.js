@@ -14,9 +14,9 @@ const protect = expressAsyncHandler(async (req, res, next) => {
       // decode the token
       // console.log(token);
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(decoded);
+      console.log(decoded, 'decodedddd');
       req.user = await User.findOne({ _id: decoded.id }).select('-password');
-      console.log(req.user);
+      console.log(req.user, '-------------');
       next();
     } catch (err) {
       console.log(err);

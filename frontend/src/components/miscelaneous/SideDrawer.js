@@ -18,7 +18,6 @@ import ChatLoading from '../ChatLoading';
 import {
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
@@ -64,9 +63,8 @@ export default function SideDrawer() {
           authorization: `Bearer ${user.jwt_token}`,
         },
       };
-
       const { data } = await axios.get(`/api/user?search=${search}`, config);
-      console.log({ data });
+
       setLoading(false);
       setSearchResult(data);
     } catch (err) {
@@ -81,33 +79,39 @@ export default function SideDrawer() {
     }
   };
 
-  // const accessChat = async (userId) => {
-  //   try {
-  //     setLoadingChat(true);
-  //     const config = {
-  //       headers: {
-  //         'Content-type': 'application/json',
-  //         authorization: `Bearer ${user.jwt_token}`,
-  //       },
-  //     };
+  const accessChat = async (userId) => {
+    try {
+      setLoadingChat(true);
+      const config = {
+        headers: {
+          'Content-type': 'application/json',
+          authorization: `Bearer ${user.jwt_token}`,
+        },
+      };
 
-  //     const { data } = await axios.post('/api/chat', { userId }, config);
-  //     setLoadingChat(false);
-  //     setSelectedChat(data);
-  //     onClose();
-  //   } catch (err) {
-  //     toast({
-  //       title: 'Error in fetching Chat with this user',
-  //       description: err.message,
-  //       status: 'error',
-  //       duration: 5000,
-  //       isClosable: true,
-  //       position: 'bottom-left',
-  //     });
-  //   }
-  // };
-  console.log(searchResult);
-  const accessChat = () => {};
+      const { data } = await axios.post('/api/chat', { userId }, config);
+
+      // we are creating a new chat with some other user, but if the chat is already present
+      // we need to find that chat from chats state and append it to chats list
+
+      if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
+
+      setLoadingChat(false);
+      setSelectedChat(data);
+      onClose();
+    } catch (err) {
+      toast({
+        title: 'Error in fetching Chat with this user',
+        description: err.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom-left',
+      });
+    }
+  };
+  // console.log(searchResult);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -123,7 +127,7 @@ export default function SideDrawer() {
       >
         <Tooltip label="Searh Users to chat" hasArrow placement="bottom-end">
           <Button variant="ghost" onClick={onOpen}>
-            <i class="fa-solid fa-magnifying-glass"></i>
+            <i className="fa-solid fa-magnifying-glass"></i>
             <Text d={{ base: 'none', md: 'flex' }} px="4">
               Search User
             </Text>
@@ -181,14 +185,13 @@ export default function SideDrawer() {
                   <UserListItem
                     user={user}
                     key={user._id}
-                    userListHandler={accessChat(user._id)}
+                    userListHandler={() => accessChat(user._id)}
                   />
                 );
               })
             )}
+            {loadingChat && <Spinner size="md" ml="auto" d="flex" />}
           </DrawerBody>
-
-          {loadingChat && <Spinner />}
         </DrawerContent>
       </Drawer>
     </>
